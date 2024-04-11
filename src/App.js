@@ -79,21 +79,40 @@ const YourComponent = () => {
 
       <h1>Vendas por categoria</h1>
       <h2>Jogo de Tabuleiro</h2>
-      {produtos.catprod === 'jogo de tabuleiro' &&( //Esse if nao funcionou
-      <ul>
-        {produtos.map( produtos => (
-          <li key={produtos.idprod}>
-          Nome: {produtos.nome_jogo}<br />
-          Vendas: {produtos.vendprod}<br />
+        {produtos.filter(produto => produto.catprod === 'jogo de tabuleiro').map(produto => (
+        <ul key={produto.idprod}>
+          <li>
+          Nome: {produto.nome_jogo}<br />
+          Vendas: {produto.vendprod}<br />
           <br />
           <br />
           </li>
+        </ul>
         ))}
-      </ul>
-      )}
 
       <h2>Miniatura</h2>
+      {produtos.filter(produto => produto.catprod === 'miniatura').map(produto => (
+        <ul key={produto.idprod}>
+          <li>
+          Nome: {produto.nome_jogo}<br />
+          Vendas: {produto.vendprod}<br />
+          <br />
+          <br />
+          </li>
+        </ul>
+        ))}
+
       <h2>Jogo de cartas</h2>
+      {produtos.filter(produto => produto.catprod === 'jogo de cartas').map(produto => (
+        <ul key={produto.idprod}>
+          <li>
+          Nome: {produto.nome_jogo}<br />
+          Vendas: {produto.vendprod}<br />
+          <br />
+          <br />
+          </li>
+        </ul>
+        ))}
 
       <h1>Itens vendidos por data</h1>
       <input
