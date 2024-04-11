@@ -1,139 +1,130 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './App.css';
 
 const YourComponent = () => {
-    const [produtos, setProdutos] = useState([]);
-    const [dataSelecionada, setDataSelecionada] = useState('');
-    const [pedidos, setPedidos] = useState([]);
-    const [clientes, setClientes] = useState([]);
+  const [produtos, setProdutos] = useState([]);
+  const [dataSelecionada, setDataSelecionada] = useState('');
+  const [pedidos, setPedidos] = useState([]);
+  const [pedidosEncontrados, setPedidosEncontrados] = useState([]);
+  const [erro, setErro] = useState(null); // Estado para armazenar mensagens de erro
 
-    useEffect(() => {
-        axios.get('http://localhost:5000/api/produtos')
-            .then(response => {
-                setProdutos(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching produtos:', error);
-            });
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/produtos')
+      .then(response => {
+        setProdutos(response.data);
+      })
+      .catch(error => {
+        setErro('Erro ao carregar produtos. Por favor, tente novamente mais tarde.');
+      });
 
-        axios.get('http://localhost:5000/api/pedidos')
-            .then(response => {
-                setPedidos(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching pedidos:', error);
-            });
+    axios.get('http://localhost:5000/api/pedidos')
+      .then(response => {
+        setPedidos(response.data);
+      })
+      .catch(error => {
+        setErro('Erro ao carregar pedidos. Por favor, tente novamente mais tarde.');
+      });
+  }, []);
 
-        axios.get('http://localhost:5000/api/clientes')
-            .then(response => {
-                setClientes(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching clientes:', error);
-            });
-        const fetchData = async () => {
-            try {
-                const response = await axios.get(`http://localhost:5000/api/pedidos/${dataSelecionada}`);
-                setPedidos(response.data);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
+  const handleDataChange = (event) => {
+    setDataSelecionada(event.target.value);
+  };
 
-        fetchData();
-    }, [dataSelecionada]);
+  const buscarItensVendidos = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/pedidos/data${dataSelecionada}`);
+      setPedidosEncontrados(response.data);
+      setErro(null); // Limpar erro se a busca for bem-sucedida
+    } catch (error) {
+      setErro('Erro ao buscar itens vendidos.');
+    }
+  };
 
-    const handleDataChange = (event) => {
-        setDataSelecionada(event.target.value);
-    };
+  return (
+    <div>
+      {erro && <div className="erro-msg">{erro}</div>}
+      <div>
+        <h1>Itens vendidos por data</h1>
+        <br />
+        <input
+          type="text"
+          placeholder="Data (YYYY-MM-DD)"
+          value={dataSelecionada}
+          onChange={handleDataChange}
+        />
+        <button onClick={buscarItensVendidos}>Buscar</button>
+      </div>
 
-    return (
+      <div>
+        <h1>Estoque</h1>
+        <ul>
+          {produtos.map(produto => (
+            <li key={produto.idprod}>
+              <strong>{produto.nome_jogo}</strong> <br />
+              Quantidade em estoque: {produto.estoqprod}<br />
+              Categoria: {produto.catprod}
+              <br /><br />
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h1>Pedidos</h1>
+        <ul>
+          {pedidos.map(pedido => (
+            <li key={pedido.id_pedidos}>
+              <strong>{pedido.id_pedidos}</strong><br />
+              Cliente: {pedido.nome_cliente}<br />
+              Data: {pedido.data}<br />
+              Valor: {pedido.total}<br /><br />
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <br /><br />
+        <h1>Vendas por categoria</h1>
         <div>
-            <h1>Estoque</h1>
-            <ul>
-                {produtos.map(produtos => (
-                    <li key={produtos.idprod}>
-                        <strong>{produtos.nome_jogo}</strong> <br />
-                        Quantidade em estoque: {produtos.estoqprod}<br />
-                        Categoria: {produtos.catprod}
-                        <br />
-                        <br />
-                    </li>
-                ))}
+          <h2>Jogo de Tabuleiro</h2>
+          {produtos.filter(produto => produto.catprod === 'jogo de tabuleiro').map(produto => (
+            <ul key={produto.idprod}>
+              <li>
+                Nome: {produto.nome_jogo}<br />
+                Vendas: {produto.vendprod}<br /><br />
+              </li>
             </ul>
-
-            <h1>Pedidos</h1>
-            <ul>
-                {pedidos.map(pedidos => (
-                    <li key={pedidos.id_pedidos}>
-                        <strong>{pedidos.id_pedidos}</strong><br />
-                        Cliente: {pedidos.nome_cliente}<br />
-                        Data: {pedidos.data}<br />
-                        Valor: {pedidos.total}<br />
-                        <br />
-                        <br />
-                    </li>
-                ))}
-            </ul>
-            <button>
-                Exibir Pedidos
-            </button>
-
-
-
-            <h1>Vendas por categoria</h1>
-            <h2>Jogo de Tabuleiro</h2>
-            {produtos.filter(produto => produto.catprod === 'jogo de tabuleiro').map(produto => (
-                <ul key={produto.idprod}>
-                    <li>
-                        Nome: {produto.nome_jogo}<br />
-                        Vendas: {produto.vendprod}<br />
-                        <br />
-                        <br />
-                    </li>
-                </ul>
-            ))}
-
-            <h2>Miniatura</h2>
-            {produtos.filter(produto => produto.catprod === 'miniatura').map(produto => (
-                <ul key={produto.idprod}>
-                    <li>
-                        Nome: {produto.nome_jogo}<br />
-                        Vendas: {produto.vendprod}<br />
-                        <br />
-                        <br />
-                    </li>
-                </ul>
-            ))}
-
-            <h2>Jogo de cartas</h2>
-            {produtos.filter(produto => produto.catprod === 'jogo de cartas').map(produto => (
-                <ul key={produto.idprod}>
-                    <li>
-                        Nome: {produto.nome_jogo}<br />
-                        Vendas: {produto.vendprod}<br />
-                        <br />
-                        <br />
-                    </li>
-                </ul>
-            ))}
-
-            <h1>Itens vendidos por data</h1>
-            <input
-                type="text"
-                placeholder="Data (DD/MM/AAAA)"
-                value={dataSelecionada}
-                onChange={handleDataChange}
-            />
-
+          ))}
         </div>
-    );
+
+        <div>
+          <h2>Miniatura</h2>
+          {produtos.filter(produto => produto.catprod === 'miniatura').map(produto => (
+            <ul key={produto.idprod}>
+              <li>
+                Nome: {produto.nome_jogo}<br />
+                Vendas: {produto.vendprod}<br /><br />
+              </li>
+            </ul>
+          ))}
+        </div>
+
+        <div>
+          <h2>Jogo de cartas</h2>
+          {produtos.filter(produto => produto.catprod === 'jogo de cartas').map(produto => (
+            <ul key={produto.idprod}>
+              <li>
+                Nome: {produto.nome_jogo}<br />
+                Vendas: {produto.vendprod}<br /><br />
+              </li>
+            </ul>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default YourComponent;
-
-//Listar todos os produtos em estoque.
-//- Mostrar detalhes de um pedido específico, incluindo os itens comprados.
-//- Encontrar clientes que gastaram mais de um determinado valor em compras.
-//- Calcular o total de vendas por categoria de produto.
-//- Mostrar itens vendidos em uma data específica
