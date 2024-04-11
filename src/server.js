@@ -17,6 +17,22 @@ app.get('/api/produtos', async (req, res) => {
   }
 });
 
+// API endpoint para os produtos filtrados por data
+app.get('/api/produtos/:data', async (req, res) => {
+  try {
+    const { data } = req.params;
+    const query = {
+      text: 'SELECT * FROM produtos WHERE data = $1',
+      values: [data],
+    };
+    const { rows } = await pool.query(query);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 // API endpoint para os pedidos
 app.get('/api/pedidos', async (req, res) => {
     try {
